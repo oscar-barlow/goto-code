@@ -1,17 +1,26 @@
 #!/usr/bin/env bash
 # Jump to a file:line in the user's configured editor.
-# Usage: goto.sh <path> <line> [description] [--list-only]
+# Usage: goto.sh <path> <line> [description] [--list-only] [--markdown]
 set -euo pipefail
 
 if [ $# -lt 2 ]; then
-  echo "usage: goto.sh <path> <line> [description] [--list-only]" >&2
+  echo "usage: goto.sh <path> <line> [description] [--list-only] [--markdown]" >&2
   exit 1
 fi
 
 PATH_ARG="$1"
 LINE="$2"
-DESC="${3:-}"
-LIST_ONLY="${4:-}"
+shift 2
+DESC=""
+LIST_ONLY=""
+MARKDOWN=false
+for ARG in "$@"; do
+  case "$ARG" in
+    --list-only) LIST_ONLY="$ARG" ;;
+    --markdown) MARKDOWN=true ;;
+    *) DESC="$ARG" ;;
+  esac
+done
 
 ABS_PATH=$(realpath "$PATH_ARG")
 LABEL="${PATH_ARG}:${LINE}"
@@ -20,7 +29,9 @@ EDITOR_MODE="${GOTO_CODE_EDITOR:-vscode}"
 case "$EDITOR_MODE" in
   vscode)
     URI="vscode://file/${ABS_PATH}:${LINE}:1"
-    if [ -n "$DESC" ]; then
+    if [ "$MARKDOWN" = true ]; then
+      printf '[%s](%s)\n' "$LABEL" "$URI"
+    elif [ -n "$DESC" ]; then
       printf '\e]8;;%s\e\\%s\e]8;;\e\\  — %s\n' "$URI" "$LABEL" "$DESC"
     else
       printf '\e]8;;%s\e\\%s\e]8;;\e\\\n' "$URI" "$LABEL"

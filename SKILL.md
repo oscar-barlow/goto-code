@@ -26,6 +26,8 @@ that's easy to get subtly wrong (a stray slash, a missing terminator), and
 getting it wrong either does nothing or, worse, prints garbled escape codes
 into the chat.
 
+For a clickable VS Code link in your reply, call `scripts/goto.sh <path> <line> --markdown` and paste its stdout verbatim into your reply.
+
 ```bash
 scripts/goto.sh <path> <line> [description] [--list-only]
 ```
